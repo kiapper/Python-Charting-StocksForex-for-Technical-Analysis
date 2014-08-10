@@ -1,0 +1,63 @@
+## This is the continue of 6 part.
+
+import dateutil
+import pyparsing
+# the first two are necesary for MATPLOTLIB
+import numpy as np
+import time
+import datetime
+import matplotlib.pyplot as plt
+import matplotlib.ticker as mticker
+import matplotlib.dates as mdates
+
+eachStock = 'TSLA','AAPL'
+
+def graphData(Stock):
+    try:
+        stockFile = Stock+'.txt'
+        
+        ##This is a numpy array. And they have the same order from the file.
+        ## the converters function will assign and  convert the first element of "stockFile" and
+        ## the function it assign it automatically to date in the array.
+        date, closep, highp, lowp, openp, volume = np.loadtxt(stockFile, delimiter=',',unpack=True,
+                                                               converters={0: mdates.strpdate2num('%Y%m%d')})
+
+        ## The fig is the variable wich contains our graph.
+        fig = plt.figure()
+        ax1 = plt.subplot(1,1,1)
+        ax1.plot(date,openp)
+        ax1.plot(date,highp)
+        ax1.plot(date,lowp)
+        ax1.plot(date,closep)
+        #ax1.plot(date,volume)
+        ## We add a grid to make the graph more readable.
+        ax1.grid(True)
+
+
+        ## We only show 10 dates. 
+        ax1.xaxis.set_major_locator(mticker.MaxNLocator(10))
+        ## We defined the formated of the date to show.
+        ax1.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d'))
+
+
+        ## We run this for loop to separete the date from the x axis. becauses they are over laping.
+        for label in ax1.xaxis.get_ticklabels():
+            label.set_rotation(45)
+
+        ##This is to adjust the graph.
+        plt.subplots_adjust(left=.10,bottom=.19, right=.93, top=.95 , wspace=.20 , hspace=.07)
+
+        ## We add labels to the axis and a title.   
+        plt.xlabel('Date')
+        plt.ylabel('Stock Price')
+        plt.suptitle(Stock+'Stock Price')
+
+        ##We show the graph.        
+        plt.show()
+
+    except Exception, e:
+        print 'failed main loop',str(e)
+
+for Stock in eachStock:
+    graphData(Stock)
+    time.sleep(1)

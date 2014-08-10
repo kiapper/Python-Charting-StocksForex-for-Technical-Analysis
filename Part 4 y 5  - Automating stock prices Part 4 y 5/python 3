@@ -1,0 +1,65 @@
+## This program is build to run more than once per day add add the new data lines of stock to each file.
+## The first time it is run the files doesnt exist, so when it try to read it will give an error but still continue.
+## and will create the files and add the correspondning data, using the time data from every  stock.
+## If the time y grater than the contained in the file it will add otherwise will not.
+
+import urllib2
+import time
+import datetime
+
+stockToPull = 'AAPL', 'GOOG','MSF','CMG','AMZN','EBAY','TSLA'
+
+def pullData(Stock):
+    try:
+        print 'Currently pulling', Stock ##What is running right now
+        ##Current time and date.
+        print str(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H.%M:%S'))
+        urlToVisit = 'http://chartapi.finance.yahoo.com/instrument/1.0/'+Stock+'/chartdata;type=quote;range=5d/csv'
+        saveFileLine = Stock + '.txt'
+
+        ##The first time we run the program there will not be files.
+        ## The first time it will do the second try first.
+        try:
+            readExistingData = open(saveFileLine,'r').read()
+            splitExisting = readExistingData.split('\n')
+            ##We find the most recent line with [-2]. Which is the last one.
+            mostRecentLine = splitExisting[-2]
+            lastUnix = mostRecentLine.split(',')[0] ## The element [0] is the first one. EX. Time
+        except Exception,e:
+            print str(e)
+            time.sleep(1)
+            ##If there doesnt exist a file the time = 0
+            lastUnix = 0
+        # If the file doesnt exists now it exists. because we use "a"
+        saveFile = open(saveFileLine,'a')
+        sourceCode = urllib2.urlopen(urlToVisit).read()
+        splitSource = sourceCode.split('\n')
+
+        for eachLine in splitSource:
+            if 'values' not in eachLine:
+                splitLine = eachLine.split(',')
+                if len(splitLine)==6:
+                    #if the first element of splitline it newst than lasunix we write the file.
+                    if int(splitLine[0]) > int(lastUnix):
+                        lineToWrite = eachLine+'\n'
+                        saveFile.write(lineToWrite)
+
+        ## We need to cole the file. If still open, the file is not avaiable to use.     
+        saveFile.close()
+
+        print 'Pulled',Stock
+        print 'sleeping'
+        print str(datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H.%M:%S'))
+        time.sleep(3)
+
+        
+
+    except Exception,e:
+            print 'main loop',str(e)
+
+
+for eachStock in stockToPull:
+    pullData(eachStock)
+
+        
+    

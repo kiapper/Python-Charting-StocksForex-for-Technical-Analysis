@@ -1,0 +1,111 @@
+## Alter 1/2
+
+## There is an other way to change the color of the shadow from a candlestick.
+# to do that we have to make a change of the finance function.py in the python27 directory
+## and this change will make it more dynamic. C:\Python27\Lib\site-packages\matplotlib
+# search for candlestick
+
+##def candlestick(ax, quotes, width=0.2, colorup='k', colordown='r',
+##                alpha=1.0, shadowCol = 'k'):'
+# We add the param shadowCol = 'k' to the fucntion.
+#and in the vline: we set color=shadowCol
+
+import dateutil
+import pyparsing
+# the first two are necesary for MATPLOTLIB
+import numpy as np
+import time
+import datetime
+import matplotlib.pyplot as plt
+import matplotlib.ticker as mticker
+import matplotlib.dates as mdates
+
+## to do CandleStick plots we use this library.
+from matplotlib.finance import candlestick
+
+##
+import matplotlib
+matplotlib.rcParams.update({'font size':9})
+eachStock = 'TSLA','AAPL'
+
+def graphData(Stock):
+    try:
+        stockFile = Stock+'.txt'
+
+        date, closep, highp, lowp, openp, volume = np.loadtxt(stockFile, delimiter=',',unpack=True,
+                                                               converters={0: mdates.strpdate2num('%Y%m%d')})
+
+
+        
+        x = 0
+        y = len(date)
+        candleAr = []
+        while x < y:
+            appendLine = date[x], openp[x],closep[x],highp[x],lowp[x],volume[x]
+            candleAr.append(appendLine)
+            x+=1
+
+
+        
+        fig = plt.figure(facecolor='black') #Background.
+        ax1 = plt.subplot2grid((5,4),(0,0),rowspan=4,colspan=4, axisbg = 'black') 
+        ## The candleStick Plot.
+        candlestick(ax1, candleAr, width = 0.75 , colorup = 'g', colordown = 'r', shadowCol = 'b') ## and here we add the shoadowCol = "Color"
+        ax1.grid(True, color = 'w') 
+        ax1.yaxis.label.set_color("w") 
+        ax1.spines['bottom'].set_color("#5998ff")
+        ax1.spines['top'].set_color("#5998ff")
+        ax1.spines['left'].set_color("#5998ff")
+        ax1.spines['right'].set_color("#5998ff")
+        ax1.tick_params(axis='y', colors = 'w')
+        plt.ylabel('Stock Price')
+
+        volumeMin = volume.min()
+
+        ax2 = plt.subplot2grid((5,4),(4,0),sharex=ax1,rowspan=1,colspan=4, axisbg = 'black')
+        ax2.plot(date,volume,'#00ffe5',linewidth=.8)
+        #with this we make a full fill line graph.
+        ax2.fill_between(date,volumeMin,volume,facecolor = '#00ffe5',alpha=.5)
+        ax2.axes.yaxis.set_ticklabels([])
+        ax2.grid(False)
+        ax2.spines['bottom'].set_color("#5998ff")
+        ax2.spines['top'].set_color("#5998ff")
+        ax2.spines['left'].set_color("#5998ff")
+        ax2.spines['right'].set_color("#5998ff")
+        ax2.tick_params(axis='x', colors = 'w')
+        ax2.tick_params(axis = 'y', colors = 'w')
+        plt.ylabel('Volume', color = 'w')
+        
+
+        ax1.xaxis.set_major_locator(mticker.MaxNLocator(10))
+        ax1.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d')) 
+
+        for label in ax1.xaxis.get_ticklabels():
+            label.set_rotation(90)
+
+        for label in ax2.xaxis.get_ticklabels():
+            label.set_rotation(45)
+
+            
+        plt.xlabel('Date')
+        
+        plt.suptitle(Stock+'Stock Price')
+
+
+        plt.setp(ax1.get_xticklabels(),visible=False)
+
+
+        plt.subplots_adjust(left=0.09,bottom=.18,right=.94,wspace=.20,hspace=0)
+        plt.show()
+
+
+        # this is for an automatic save file.
+
+        fig.savefig('example.png', facecolor = fig.get_facecolor())
+
+    except Exception, e:
+        print 'failed main loop',str(e)
+
+for Stock in eachStock:
+    graphData(Stock)
+    time.sleep(1)

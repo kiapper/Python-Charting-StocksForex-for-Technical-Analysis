@@ -1,0 +1,82 @@
+##This is the continue of the 9 chart but with many changes.
+## we try to make a unnion betwwen the first and the second graph. with no space betwwen them. and only one date label axis.
+
+import dateutil
+import pyparsing
+# the first two are necesary for MATPLOTLIB
+import numpy as np
+import time
+import datetime
+import matplotlib.pyplot as plt
+import matplotlib.ticker as mticker
+import matplotlib.dates as mdates
+
+##
+import matplotlib
+matplotlib.rcParams.update({'font size':9})
+eachStock = 'TSLA','AAPL'
+
+def graphData(Stock):
+    try:
+        stockFile = Stock+'.txt'
+
+        date, closep, highp, lowp, openp, volume = np.loadtxt(stockFile, delimiter=',',unpack=True,
+                                                               converters={0: mdates.strpdate2num('%Y%m%d')})
+        fig = plt.figure()
+        # We use the subplot2grid to unnion to plots.
+        # (5,4) is the size of the plot, (0,0) is where it starts.
+        ax1 = plt.subplot2grid((5,4),(0,0),rowspan=4,colspan=4)
+        ax1.plot(date,openp)
+        ax1.plot(date,highp)
+        ax1.plot(date,lowp)
+        ax1.plot(date,closep)
+        plt.ylabel('Stock Price')
+        ax1.grid(True)
+
+        #New axis, with sharex = ax1. we link both grapich. if we zoom one the other will zoom too., and the dates change also.
+
+        ax2 = plt.subplot2grid((5,4),(4,0),sharex=ax1,rowspan=1,colspan=4)
+        ax2.bar(date,volume)
+
+        # With this code we remove al labels from xaxis from the first plot = ax1
+
+        ax2.axes.yaxis.set_ticklabels([])
+        plt.ylabel('Volume')
+        ax2.grid(True)
+
+        # this show a maximun of 10 dates.
+
+        ax1.xaxis.set_major_locator(mticker.MaxNLocator(10))
+        ax1.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d'))
+
+        for label in ax1.xaxis.get_ticklabels():
+            label.set_rotation(90)
+
+        for label in ax2.xaxis.get_ticklabels():
+            label.set_rotation(45)
+
+        #plt.subplots_adjust(left=.10,bottom=.19, right=.93, top=.95 , wspace=.20 , hspace=.07)
+            
+        plt.xlabel('Date')
+        plt.suptitle(Stock+'Stock Price')
+
+        ##We use this part of the code to disapear the label data from the X1 axis.
+
+        plt.setp(ax1.get_xticklabels(),visible=False)
+
+        ##We use the subplot_adjust to make a unnion between our to plot. hspcae = 0.
+        ## to make they really close.
+
+        plt.subplots_adjust(left=0.09,bottom=.18,right=.94,wspace=.20,hspace=0)
+        plt.show()
+
+        # this is for an automatic save file.
+
+        fig.savefig('example.png')
+
+    except Exception, e:
+        print 'failed main loop',str(e)
+
+for Stock in eachStock:
+    graphData(Stock)
+    time.sleep(1)

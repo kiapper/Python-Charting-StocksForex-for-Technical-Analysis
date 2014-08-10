@@ -1,0 +1,29 @@
+import urllib2
+import time
+
+##The stock we want.
+stockToPull = 'AAPL'
+
+
+def pullData(Stock):
+    try:
+        fileLine = Stock+'.txt' ## The name of the stock we want to pull down.
+        urlToVisit = 'http://chartapi.finance.yahoo.com/instrument/1.0/'+Stock+'/chartdata;type=quote;range=1y/csv'
+        sourceCode = urllib2.urlopen(urlToVisit).read() ## We defined the way we want to viset that site. We will read it.
+        splitSource = sourceCode.split('\n') ## We we will split the code. It will be divided in lines.
+
+        for eachLine in splitSource:
+            splitLine = eachLine.split(',') ## The data is split in ","
+            if len(splitLine)==6: ## If we split by "," we have 6 paeces of data.
+                if 'values' not in eachLine:
+                    saveFile = open(fileLine,'a') ## We use "a" to append
+                    lineToWrite = eachLine + '\n'
+                    saveFile.write(lineToWrite)
+        print 'Pulled',Stock
+        print 'sleeping'
+        time.sleep(5)
+
+    except Exception,e:
+            print 'main loop',str(e)
+
+pullData(stockToPull)     

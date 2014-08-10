@@ -1,0 +1,32 @@
+import urllib2
+import time
+
+## In this example we want more than one stock of data.
+stockToPull = 'AAPL', 'GOOG','MSF','CMG','AMZN','EBAY','TSLA'
+
+def pullData(Stock):
+    try:
+        fileLine = Stock+'.txt'
+        urlToVisit = 'http://chartapi.finance.yahoo.com/instrument/1.0/'+Stock+'/chartdata;type=quote;range=3y/csv'
+        sourceCode = urllib2.urlopen(urlToVisit).read()
+        splitSource = sourceCode.split('\n')
+
+        for eachLine in splitSource:
+            splitLine = eachLine.split(',')
+            if len(splitLine)==6:
+                if 'values' not in eachLine:
+                    saveFile = open(fileLine,'a')
+                    lineToWrite = eachLine + '\n'
+                    saveFile.write(lineToWrite)
+        print 'Pulled',Stock
+        print 'sleeping'
+        time.sleep(1)
+
+    except Exception,e:
+            print 'main loop',str(e)
+
+
+## We add this for loop for eery stock in the list we will run this function.
+for eachStock in stockToPull:
+    pullData(eachStock)
+    
